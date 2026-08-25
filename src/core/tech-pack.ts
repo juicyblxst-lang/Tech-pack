@@ -15,11 +15,11 @@ export function createTechPackDocument(category: 'tshirt' | 'hoodie'): TechPackD
     styleName: category === 'hoodie' ? 'New Hoodie' : 'New T-shirt',
     category,
     sections: [
-      { title: 'PRODUCT OVERVIEW', items: ['Style name', 'Category', 'Colorway', 'Fit'] },
-      { title: 'MEASUREMENTS', items: ['POM code', 'Measurement definition', 'Spec', 'Tolerance'] },
-      { title: 'BILL OF MATERIALS', items: ['Component', 'Material', 'Composition', 'Color', 'Supplier notes'] },
-      { title: 'CONSTRUCTION', items: ['Operation', 'Seam', 'Stitch', 'Thread', 'Placement'] },
-      { title: 'ARTWORK', items: ['Artwork name', 'Technique', 'Placement', 'Size', 'Color'] },
+      { title: 'PRODUCT OVERVIEW', items: [] },
+      { title: 'MEASUREMENTS', items: [] },
+      { title: 'BILL OF MATERIALS', items: [] },
+      { title: 'CONSTRUCTION', items: [] },
+      { title: 'ARTWORK', items: [] },
     ],
   }
 }
@@ -28,12 +28,23 @@ export function escapeXml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
 }
 
+function text(x: number, y: number, value: string, size = 9, weight = '400', anchor = 'start') {
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Arial, Helvetica, sans-serif" font-size="${size}" font-weight="${weight}">${escapeXml(value)}</text>`
+}
+
+function sectionBlock(section: TechPackSection, y: number): string {
+  const rows = section.items.slice(0, 7)
+  const height = Math.max(58, 32 + rows.length * 18)
+  return `<g><rect x="42" y="${y}" width="716" height="${height}" fill="#fff" stroke="#111"/><rect x="42" y="${y}" width="716" height="26" fill="#f1f1f1"/><text x="54" y="${y + 18}" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700">${escapeXml(section.title)}</text>${rows.map((item, i) => text(54, y + 48 + i * 18, item, 8)).join('')}</g>`
+}
+
 export function renderTechPackSvg(doc: TechPackDocument, flatSvg?: string): string {
-  const sections = doc.sections.map((section, index) => {
-    const y = 500 + index * 72
-    const items = section.items.join('  •  ')
-    return `<g><text x="42" y="${y}" font-family="Arial, sans-serif" font-size="12" font-weight="700">${escapeXml(section.title)}</text><line x1="42" y1="${y + 10}" x2="758" y2="${y + 10}" stroke="#111" stroke-width="1"/><text x="42" y="${y + 34}" font-family="Arial, sans-serif" font-size="10">${escapeXml(items)}</text></g>`
-  }).join('')
-  const flat = flatSvg ? flatSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '').replace(/<rect[^>]*\/>/, '') : '<text x="400" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">TECHNICAL FLAT / FRONT + BACK</text>'
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900"><rect width="800" height="900" fill="#fff"/><rect x="24" y="24" width="752" height="852" fill="none" stroke="#111"/><text x="42" y="66" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(doc.title)}</text><text x="42" y="94" font-family="Arial, sans-serif" font-size="12">${escapeXml(doc.styleName)}</text><text x="42" y="126" font-family="Arial, sans-serif" font-size="10">TECHNICAL SPECIFICATION / REV 01</text><rect x="42" y="150" width="716" height="300" fill="#fafafa" stroke="#111"/><g transform="translate(220 150) scale(1.15)">${flat}</g>${sections}</svg>`
+  const flat = flatSvg
+    ? flatSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '').replace(/<rect[^>]*\/>/, '')
+    : text(400, 245, 'TECHNICAL FLAT / FRONT + BACK', 12, '400', 'middle')
+
+  const sections = doc.sections.map((section, index) => sectionBlock(section, 492 + index * 78)).join('')
+  const footerY = 492 + doc.sections.length * 78 + 20
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 920"><rect width="800" height="920" fill="#fff"/><rect x="24" y="24" width="752" height="872" fill="none" stroke="#111"/><rect x="24" y="24" width="752" height="112" fill="#111"/><text x="42" y="65" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#fff">${escapeXml(doc.title)}</text><text x="42" y="91" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#fff">${escapeXml(doc.styleName)}</text><text x="758" y="91" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#fff">REV 01 · TECHNICAL SPECIFICATION</text><rect x="42" y="154" width="716" height="304" fill="#fafafa" stroke="#111"/><g transform="translate(218 154) scale(1.15)">${flat}</g>${sections}<line x1="42" y1="${footerY}" x2="758" y2="${footerY}" stroke="#111"/>${text(42, footerY + 18, 'Generated technical specification · Verify all production measurements against approved sample.', 7)}${text(758, footerY + 18, 'PAGE 01', 7, '400', 'end')}</svg>`
 }
