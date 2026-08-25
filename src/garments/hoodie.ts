@@ -7,8 +7,8 @@ export function createHoodie(): GarmentSpec {
   return {
     ...createStarterSpec('hoodie'),
     name: 'Oversized Hoodie',
-    measurements: hoodiePOMs.map(p => ({ id: p.id, name: p.name, value: p.value, unit: p.unit, tolerance: p.tolerance, definition: p.definition })),
-    materials: hoodieBOM.map(item => ({ id: item.id, name: item.item, type: item.category, color: 'Black', notes: item.specification })),
-    construction: hoodieConstruction.map(step => `${step.operation}: ${step.instruction}`),
+    measurements: hoodiePOMs.map(p => ({ id: p.id, name: p.name, value: p.value ?? 0, unit: p.unit, tolerance: p.tolerance })),
+    materials: hoodieBOM.map(item => ({ id: item.id, name: item.item, specification: item.specification, color: 'Black' })),
+    construction: hoodieConstruction.map(step => step.operation + (step.notes ? `: ${step.notes}` : '')),
   }
 }
