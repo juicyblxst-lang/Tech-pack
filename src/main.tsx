@@ -18,7 +18,7 @@ function App() {
   const [styleName, setStyleName] = useState('')
   const [artwork, setArtwork] = useState<ArtworkSpec>(defaultArtwork)
   const spec = useMemo(() => { const base = category === 'tshirt' ? createTshirt() : createHoodie(); base.measurements = base.measurements.map(m => ({ ...m, value: measurements[m.id] ?? m.value })); if (styleName) base.name = styleName; return base }, [category, measurements, styleName])
-  const preview = useMemo(() => { const built = buildTechPackPreview(spec); return { ...built, bom: built.bom.map(item => ({ ...item, ...bomEdits[item.id] })), construction: built.construction.map(item => ({ ...item, ...constructionEdits[item.id] })) } }, [spec, bomEdits, constructionEdits])
+  const preview = useMemo(() => { const built = buildTechPackPreview(spec, artwork); return { ...built, bom: built.bom.map(item => ({ ...item, ...bomEdits[item.id] })), construction: built.construction.map(item => ({ ...item, ...constructionEdits[item.id] })) } }, [spec, artwork, bomEdits, constructionEdits])
   const validation = validateTechPack(spec, preview.pom.map(m => ({ id: m.id, name: m.name, definition: m.definition, value: m.value, unit: m.unit, tolerance: m.tolerance })), preview.bom.map(m => ({ id: m.id, category: m.category, item: m.item, specification: m.specification, placement: m.placement })), preview.construction.map(c => ({ id: c.id, operation: c.operation, instruction: c.operation })))
   const editMeasurement = (id: string, raw: string) => { const value = Number(raw); if (Number.isFinite(value)) setMeasurements(current => ({ ...current, [id]: value })) }
   const editBom = (id: string, field: 'specification' | 'placement', value: string) => setBomEdits(current => ({ ...current, [id]: { ...current[id], [field]: value } }))
