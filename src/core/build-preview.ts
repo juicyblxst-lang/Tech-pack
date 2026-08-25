@@ -10,7 +10,7 @@ function valueFor(spec: GarmentSpec, id: string, fallback: number) { return spec
 function geometryFor(spec: GarmentSpec) { return { bodyWidth:valueFor(spec,'chest',spec.category==='hoodie'?100:92), bodyLength:valueFor(spec,'body-length',spec.category==='hoodie'?230:220), sleeveLength:valueFor(spec,'sleeve',spec.category==='hoodie'?70:52) } }
 
 export function buildTechPackPreview(spec: GarmentSpec, artworks: ArtworkSpec[] = []) {
-  const isHoodie=spec.category==='hoodie', poms=isHoodie?hoodiePOMs:tshirtPOMs, bom=isHoodie?hoodieBOM:tshirtBOM, construction=isHoodie?hoodieConstruction: t shirtConstruction, geometry=geometryFor(spec)
+  const isHoodie=spec.category==='hoodie', poms=isHoodie?hoodiePOMs:tshirtPOMs, bom=isHoodie?hoodieBOM:tshirtBOM, construction=isHoodie?hoodieConstruction:tshirtConstruction, geometry=geometryFor(spec)
   const overlays=artworks.map(artwork=>({id:artwork.id,name:artwork.name,technique:artwork.technique,placement:artwork.placement,width:artwork.width,height:artwork.height,colors:artwork.colors,notes:artwork.notes,assetDataUrl:artwork.assetDataUrl}))
   const backPlacements=new Set(['center-back','neck-label','hem-label'])
   const frontArtworks=overlays.filter(a=>!backPlacements.has(a.placement))
