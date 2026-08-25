@@ -23,7 +23,8 @@ export function buildTechPackPreview(spec: GarmentSpec) {
   const bom = isHoodie ? hoodieBOM : tshirtBOM
   const construction = isHoodie ? hoodieConstruction : tshirtConstruction
   const geometry = geometryFor(spec)
-  const flat = isHoodie ? renderHoodieFlat(geometry) : renderTshirtFlat(geometry)
+  const frontElements = isHoodie ? renderHoodieFlat(geometry) : renderTshirtFlat(geometry)
+  const flatSvg = elementsToSvg(frontElements)
   const document = createTechPackDocument(spec.category)
   document.styleName = spec.name
   return {
@@ -31,7 +32,7 @@ export function buildTechPackPreview(spec: GarmentSpec) {
     pom: poms.map(item => ({ ...item, value: spec.measurements.find(m => m.id === item.id)?.value ?? item.value })),
     bom,
     construction,
-    flatSvg: elementsToSvg(flat),
-    sheetSvg: renderTechPackSvg(document),
+    flatSvg,
+    sheetSvg: renderTechPackSvg(document, flatSvg),
   }
 }
