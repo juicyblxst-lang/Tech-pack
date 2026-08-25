@@ -1,33 +1,54 @@
-export type Point = { x: number; y: number }
-export type SvgElement = { tag: 'path' | 'line' | 'circle'; attrs: Record<string, string | number> }
+export type SvgElement = { tag: 'path' | 'line' | 'circle' | 'text'; attrs: Record<string, string | number> }
+export type FlatOptions = { bodyWidth?: number; bodyLength?: number; sleeveLength?: number }
 
-const path = (d: string, attrs: Record<string, string | number> = {}): SvgElement => ({ tag: 'path', attrs: { d, fill: 'none', stroke: '#111', 'stroke-width': 2, ...attrs } })
-const line = (x1:number,y1:number,x2:number,y2:number,attrs:Record<string,string|number>={}) => ({ tag:'line' as const, attrs:{x1,y1,x2,y2,stroke:'#111','stroke-width':2,...attrs} })
+const path = (d: string, attrs: Record<string, string | number> = {}): SvgElement => ({ tag: 'path', attrs: { d, fill: 'none', stroke: '#111', 'stroke-width': 1.8, 'stroke-linejoin': 'round', ...attrs } })
+const line = (x1:number,y1:number,x2:number,y2:number,attrs:Record<string,string|number>={}) => ({ tag:'line' as const, attrs:{x1,y1,x2,y2,stroke:'#111','stroke-width':1.4,...attrs} })
+const text = (x:number,y:number,value:string,attrs:Record<string,string|number>={}) => ({ tag:'text' as const, attrs:{x,y,'font-family':'Arial, sans-serif','font-size':9,fill:'#111',...attrs,'data-text':value} })
 
-export function renderTshirtFlat(): SvgElement[] {
+export function renderTshirtFlat(options: FlatOptions = {}): SvgElement[] {
+  const w = options.bodyWidth ?? 92, h = options.bodyLength ?? 220, sleeve = options.sleeveLength ?? 52
+  const cx = 150, top = 72, left = cx - w / 2, right = cx + w / 2, hem = top + h
   return [
-    path('M 90 70 L 150 40 L 210 70 L 235 125 L 205 145 L 185 105 L 185 300 L 115 300 L 115 105 L 95 145 L 65 125 Z'),
-    path('M 150 40 C 132 40 128 58 150 65 C 172 58 168 40 150 40'),
-    line(115,105,185,105,{ 'stroke-dasharray':'6 5', 'stroke-width':1 }),
-    line(115,300,185,300,{ 'stroke-width':3 }),
-    line(65,125,95,145,{ 'stroke-width':1 }),
-    line(205,145,235,125,{ 'stroke-width':1 }),
+    path(`M ${left+22} ${top+18} L ${cx-20} ${top} L ${cx} ${top+18} L ${cx+20} ${top} L ${right-22} ${top+18} L ${right+sleeve} ${top+65} L ${right+22} ${top+85} L ${right} ${top+62} L ${right} ${hem} L ${left} ${hem} L ${left} ${top+62} L ${left-22} ${top+85} L ${left-sleeve} ${top+65} L ${left-22} ${top+18} Z`),
+    path(`M ${cx-20} ${top} C ${cx-17} ${top+25}, ${cx+17} ${top+25}, ${cx+20} ${top}`, { 'stroke-width': 2 }),
+    line(left, top+62, right, top+62, {'stroke-dasharray':'5 4','stroke-width':1}),
+    line(left, hem, right, hem, {'stroke-width':2.4}),
+    line(left-22, top+85, left+22, top+62, {'stroke-width':1}),
+    line(right+22, top+85, right-22, top+62, {'stroke-width':1}),
+    text(cx, hem+22, 'FRONT', {'text-anchor':'middle','font-size':10,'font-weight':'700'}),
   ]
 }
 
-export function renderHoodieFlat(): SvgElement[] {
+export function renderHoodieFlat(options: FlatOptions = {}): SvgElement[] {
+  const w = options.bodyWidth ?? 100, h = options.bodyLength ?? 230, sleeve = options.sleeveLength ?? 70
+  const cx = 150, top = 82, left = cx-w/2, right = cx+w/2, hem = top+h
   return [
-    path('M 105 82 L 150 50 L 195 82 L 225 125 L 205 145 L 185 120 L 185 310 L 115 310 L 115 120 L 95 145 L 75 125 Z'),
-    path('M 120 58 C 118 35 182 35 180 58 L 170 90 L 150 105 L 130 90 Z'),
-    path('M 125 190 L 175 190 L 185 225 L 115 225 Z'),
-    line(115,310,185,310,{ 'stroke-width':3 }),
-    line(115,120,185,120,{ 'stroke-dasharray':'6 5', 'stroke-width':1 }),
-    line(75,125,95,145,{ 'stroke-width':1 }),
-    line(205,145,225,125,{ 'stroke-width':1 }),
+    path(`M ${left+22} ${top+18} L ${cx-28} ${top} L ${cx-20} ${top+42} L ${cx} ${top+58} L ${cx+20} ${top+42} L ${cx+28} ${top} L ${right-22} ${top+18} L ${right+sleeve} ${top+72} L ${right+20} ${top+94} L ${right} ${top+64} L ${right} ${hem} L ${left} ${hem} L ${left} ${top+64} L ${left-20} ${top+94} L ${left-sleeve} ${top+72} L ${left-22} ${top+18} Z`),
+    path(`M ${cx-28} ${top} C ${cx-34} ${top-34}, ${cx+34} ${top-34}, ${cx+28} ${top}`, {'stroke-width':2}),
+    path(`M ${cx-32} ${top+35} C ${cx-16} ${top+62}, ${cx+16} ${top+62}, ${cx+32} ${top+35}`),
+    path(`M ${cx-34} ${top+118} L ${cx+34} ${top+118} L ${cx+28} ${top+158} L ${cx-28} ${top+158} Z`),
+    line(left, hem, right, hem, {'stroke-width':2.4}),
+    line(left-20, top+94, left+22, top+64, {'stroke-width':1}),
+    line(right+20, top+94, right-22, top+64, {'stroke-width':1}),
+    text(cx, hem+22, 'FRONT', {'text-anchor':'middle','font-size':10,'font-weight':'700'}),
   ]
+}
+
+export function renderBackFlat(category: 'tshirt'|'hoodie', options: FlatOptions = {}): SvgElement[] {
+  const elements = category === 'hoodie' ? renderHoodieFlat(options) : renderTshirtFlat(options)
+  return elements.map(e => e.tag === 'text' ? {...e, attrs:{...e.attrs, 'data-text':'BACK'}} : e).concat(text(150, 330, 'BACK', {'text-anchor':'middle','font-size':10,'font-weight':'700'}))
 }
 
 export function elementsToSvg(elements: SvgElement[], width=360, height=360): string {
-  const body = elements.map(({tag, attrs}) => `<${tag} ${Object.entries(attrs).map(([k,v])=>`${k}="${v}"`).join(' ')} />`).join('')
+  const body = elements.map(({tag, attrs}) => {
+    const attrsCopy = {...attrs}; const value = attrsCopy['data-text']; delete attrsCopy['data-text']
+    const serialized = Object.entries(attrsCopy).map(([k,v])=>`${k}="${String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"`).join(' ')
+    return tag === 'text' ? `<text ${serialized}>${value ?? ''}</text>` : `<${tag} ${serialized} />`
+  }).join('')
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"><rect width="100%" height="100%" fill="white"/>${body}</svg>`
+}
+
+export function renderTechnicalFlat(category: 'tshirt'|'hoodie', options?: FlatOptions): string {
+  const front = category === 'hoodie' ? renderHoodieFlat(options) : renderTshirtFlat(options)
+  return elementsToSvg(front)
 }
