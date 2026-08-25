@@ -1,41 +1,25 @@
-import { StrictMode } from 'react'
+import { StrictMode, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
-
-const garments = [
-  { name: 'T-shirt', detail: 'Classic crew neck', status: 'Ready' },
-  { name: 'Hoodie', detail: 'Oversized pullover', status: 'Ready' },
-]
+import { createTshirt } from './garments/tshirt'
+import { createHoodie } from './garments/hoodie'
+import { renderTechnicalFlat } from './engines/technical-flat/svg'
+import { validateTechPack } from './core/validation'
 
 function App() {
-  return (
-    <main className="shell">
-      <nav className="nav">
-        <div className="brand">TECH PACK <span>STUDIO</span></div>
-        <div className="nav-links"><a href="#how">How it works</a><a href="#workspace">Workspace</a><button>Sign in</button></div>
-      </nav>
+  const [category, setCategory] = useState<'tshirt' | 'hoodie'>('tshirt')
+  const spec = useMemo(() => category === 'tshirt' ? createTshirt() : createHoodie(), [category])
+  const validation = validateTechPack(spec, spec.measurements.map(m => ({ id: m.id, name: m.name, definition: m.definition, value: m.value, unit: m.unit, tolerance: m.tolerance })), spec.materials.map(m => ({ id: m.id, category: m.type === 'fabric' || m.type === 'trim' || m.type === 'thread' || m.type === 'label' || m.type === 'artwork' ? m.type : 'fabric', item: m.name, specification: m.notes ?? '', placement: undefined })), spec.construction.map((instruction, i) => ({ id: String(i), operation: instruction.split(':')[0], instruction })))
+  const svg = renderTechnicalFlat(category)
 
-      <section className="hero">
-        <p className="eyebrow">FROM IDEA TO FACTORY</p>
-        <h1>Turn a garment idea into a<br /><em>professional tech pack.</em></h1>
-        <p className="lede">Define your garment once. Generate technical flats, measurements, materials, construction details and a manufacturer-ready document from one structured specification.</p>
-        <div className="actions"><button className="primary">Create a tech pack</button><button className="secondary">See how it works ↓</button></div>
-      </section>
-
-      <section id="workspace" className="workspace">
-        <div className="section-head"><div><p className="eyebrow">WORKSPACE</p><h2>Start with a garment.</h2></div><button className="new">+ New project</button></div>
-        <div className="cards">
-          {garments.map((garment) => <article className="card" key={garment.name}>
-            <div className="garment-art"><div className={garment.name === 'Hoodie' ? 'silhouette hoodie' : 'silhouette tee'} /></div>
-            <div className="card-copy"><div><h3>{garment.name}</h3><p>{garment.detail}</p></div><span className="status">{garment.status}</span></div>
-          </article>)}
-          <article className="card add"><div className="plus">+</div><h3>Start from an idea</h3><p>Describe what you want to make.</p></article>
-        </div>
-      </section>
-
-      <section id="how" className="flow"><p className="eyebrow">THE WORKFLOW</p><div className="steps"><span>01 · DEFINE</span><span>→</span><span>02 · GENERATE</span><span>→</span><span>03 · REVIEW</span><span>→</span><span>04 · EXPORT</span></div></section>
-    </main>
-  )
+  return <main className="app">
+    <header><div className="brand">TECH PACK <span>STUDIO</span></div><div className="badge">ENGINE PREVIEW</div></header>
+    <section className="hero"><p className="eyebrow">FROM IDEA TO FACTORY</p><h1>Build the garment.<br/><em>Generate the pack.</em></h1><p>Structured garment data now drives the technical flat, measurements, materials, construction and validation.</p></section>
+    <section className="builder">
+      <aside><p className="eyebrow">GARMENT</p><div className="switch"><button className={category === 'tshirt' ? 'active' : ''} onClick={() => setCategory('tshirt')}>T-shirt</button><button className={category === 'hoodie' ? 'active' : ''} onClick={() => setCategory('hoodie')}>Hoodie</button></div><h2>{spec.name}</h2><p className="muted">{spec.fit} fit · {spec.colorways.join(', ')}</p><div className="stats"><div><strong>{spec.measurements.length}</strong><span>POMs</span></div><div><strong>{spec.materials.length}</strong><span>BOM items</span></div><div><strong>{spec.construction.length}</strong><span>Construction</span></div></div><div className={validation.valid ? 'valid' : 'invalid'}>{validation.valid ? '✓ Ready for pack generation' : `${validation.errors.length} issues`}</div></aside>
+      <div className="preview"><div className="preview-head"><span>TECHNICAL FLAT · FRONT</span><span>1:1</span></div><div className="flat" dangerouslySetInnerHTML={{ __html: svg }} /></div>
+    </section>
+  </main>
 }
 
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>)
