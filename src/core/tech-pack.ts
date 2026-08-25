@@ -28,11 +28,12 @@ export function escapeXml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
 }
 
-export function renderTechPackSvg(doc: TechPackDocument): string {
+export function renderTechPackSvg(doc: TechPackDocument, flatSvg?: string): string {
   const sections = doc.sections.map((section, index) => {
-    const y = 360 + index * 72
+    const y = 500 + index * 72
     const items = section.items.join('  •  ')
     return `<g><text x="42" y="${y}" font-family="Arial, sans-serif" font-size="12" font-weight="700">${escapeXml(section.title)}</text><line x1="42" y1="${y + 10}" x2="758" y2="${y + 10}" stroke="#111" stroke-width="1"/><text x="42" y="${y + 34}" font-family="Arial, sans-serif" font-size="10">${escapeXml(items)}</text></g>`
   }).join('')
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 760"><rect width="800" height="760" fill="#fff"/><rect x="24" y="24" width="752" height="712" fill="none" stroke="#111"/><text x="42" y="66" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(doc.title)}</text><text x="42" y="94" font-family="Arial, sans-serif" font-size="12">${escapeXml(doc.styleName)}</text><text x="42" y="126" font-family="Arial, sans-serif" font-size="10">TECHNICAL SPECIFICATION / REV 01</text><rect x="42" y="150" width="716" height="180" fill="#fafafa" stroke="#111"/><text x="400" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">TECHNICAL FLAT / FRONT + BACK</text>${sections}</svg>`
+  const flat = flatSvg ? flatSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '').replace(/<rect[^>]*\/>/, '') : '<text x="400" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">TECHNICAL FLAT / FRONT + BACK</text>'
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900"><rect width="800" height="900" fill="#fff"/><rect x="24" y="24" width="752" height="852" fill="none" stroke="#111"/><text x="42" y="66" font-family="Arial, sans-serif" font-size="24" font-weight="700">${escapeXml(doc.title)}</text><text x="42" y="94" font-family="Arial, sans-serif" font-size="12">${escapeXml(doc.styleName)}</text><text x="42" y="126" font-family="Arial, sans-serif" font-size="10">TECHNICAL SPECIFICATION / REV 01</text><rect x="42" y="150" width="716" height="300" fill="#fafafa" stroke="#111"/><g transform="translate(220 150) scale(1.15)">${flat}</g>${sections}</svg>`
 }
