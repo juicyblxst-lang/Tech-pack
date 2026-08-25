@@ -1,17 +1,24 @@
-export interface ConstructionStep { id: string; operation: string; instruction: string }
-
-export const tshirtConstruction: ConstructionStep[] = [
-  { id: 'neck', operation: 'Neckband', instruction: 'Attach self-fabric or rib neckband with clean finish and consistent topstitch.' },
-  { id: 'shoulder', operation: 'Shoulder seams', instruction: 'Join front and back shoulder seams; reinforce seam where required.' },
-  { id: 'sleeve', operation: 'Sleeves', instruction: 'Set sleeves into armholes and maintain smooth sleeve cap.' },
-  { id: 'side', operation: 'Side seams', instruction: 'Close side seams and finish seam allowance consistently.' },
-  { id: 'hem', operation: 'Bottom hem', instruction: 'Turn hem evenly and secure with coverstitch or specified stitch.' },
-]
+export interface ConstructionStep {
+  id: string
+  title: string
+  operation: string
+  seam?: string
+  stitch?: string
+  notes?: string
+}
 
 export const hoodieConstruction: ConstructionStep[] = [
-  { id: 'hood', operation: 'Hood', instruction: 'Join hood panels, finish opening, and insert drawcord where specified.' },
-  { id: 'shoulder', operation: 'Shoulders', instruction: 'Join body shoulders and reinforce seam according to construction standard.' },
-  { id: 'sleeve', operation: 'Sleeves', instruction: 'Attach sleeves and close underarm seams.' },
-  { id: 'pocket', operation: 'Kangaroo pocket', instruction: 'Turn and topstitch pocket opening, then attach symmetrically to front body.' },
-  { id: 'cuff', operation: 'Cuffs and hem', instruction: 'Attach 2x2 rib cuffs and hem band with controlled stretch.' },
+  { id: 'hood', title: 'Hood Assembly', operation: 'Join hood panels at center seam, press seam, then attach hood to neckline.', seam: 'Overlock', stitch: '4-thread overlock' },
+  { id: 'shoulder', title: 'Shoulder Seams', operation: 'Join front and back shoulders and stabilize seam.', seam: 'Overlock', stitch: '4-thread overlock' },
+  { id: 'sleeve', title: 'Sleeve Attachment', operation: 'Attach sleeves to armholes, matching notches.', seam: 'Overlock', stitch: '4-thread overlock' },
+  { id: 'pocket', title: 'Kangaroo Pocket', operation: 'Turn pocket opening, topstitch, position on front body and secure perimeter.', seam: 'Turn and topstitch', stitch: 'Single needle topstitch' },
+  { id: 'cuff', title: 'Cuffs and Hem', operation: 'Join rib rings, attach to sleeve and body openings with even stretch.', seam: 'Overlock', stitch: '4-thread overlock' },
+]
+
+export const tshirtConstruction: ConstructionStep[] = [
+  { id: 'shoulder', title: 'Shoulder Seams', operation: 'Join front and back shoulders and stabilize seam.', seam: 'Overlock', stitch: '4-thread overlock' },
+  { id: 'neck', title: 'Neck Rib', operation: 'Join rib ring, attach evenly around neckline and coverstitch.', seam: 'Overlock + coverstitch', stitch: 'Coverstitch' },
+  { id: 'sleeve', title: 'Sleeve Attachment', operation: 'Attach sleeves to armholes, matching notches.', seam: 'Overlock', stitch: '4-thread overlock' },
+  { id: 'side', title: 'Side Seams', operation: 'Close body from sleeve opening through hem.', seam: 'Overlock', stitch: '4-thread overlock' },
+  { id: 'hem', title: 'Bottom Hem', operation: 'Turn hem evenly and secure with coverstitch.', seam: 'Turn and coverstitch', stitch: 'Coverstitch' },
 ]
