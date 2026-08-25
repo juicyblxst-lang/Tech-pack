@@ -9,6 +9,8 @@ export interface ArtworkSpec {
   height: string
   colors: string
   notes?: string
+  assetName?: string
+  assetDataUrl?: string
 }
 
 export const defaultArtwork: ArtworkSpec = {
