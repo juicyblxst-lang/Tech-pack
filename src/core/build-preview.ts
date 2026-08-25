@@ -5,17 +5,30 @@ import { hoodieConstruction, tshirtConstruction } from './construction'
 import { renderHoodieFlat, renderTshirtFlat, elementsToSvg } from '../engines/technical-flat/svg'
 import { createTechPackDocument, renderTechPackSvg } from './tech-pack'
 
+function valueFor(spec: GarmentSpec, id: string, fallback: number): number {
+  const measurement = spec.measurements.find(item => item.id === id)
+  return measurement?.value ?? fallback
+}
+
+function geometryFor(spec: GarmentSpec) {
+  const bodyWidth = valueFor(spec, 'chest', spec.category === 'hoodie' ? 100 : 92)
+  const bodyLength = valueFor(spec, 'body-length', spec.category === 'hoodie' ? 230 : 220)
+  const sleeveLength = valueFor(spec, 'sleeve', spec.category === 'hoodie' ? 70 : 52)
+  return { bodyWidth, bodyLength, sleeveLength }
+}
+
 export function buildTechPackPreview(spec: GarmentSpec) {
   const isHoodie = spec.category === 'hoodie'
   const poms = isHoodie ? hoodiePOMs : tshirtPOMs
   const bom = isHoodie ? hoodieBOM : tshirtBOM
   const construction = isHoodie ? hoodieConstruction : tshirtConstruction
-  const flat = isHoodie ? renderHoodieFlat() : renderTshirtFlat()
+  const geometry = geometryFor(spec)
+  const flat = isHoodie ? renderHoodieFlat(geometry) : renderTshirtFlat(geometry)
   const document = createTechPackDocument(spec.category)
   document.styleName = spec.name
   return {
     spec,
-    pom: poms,
+    pom: poms.map(item => ({ ...item, value: spec.measurements.find(m => m.id === item.id)?.value ?? item.value })),
     bom,
     construction,
     flatSvg: elementsToSvg(flat),
