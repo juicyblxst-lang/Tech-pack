@@ -2,7 +2,7 @@ import type { GarmentSpec } from './garment-spec'
 import { hoodiePOMs, tshirtPOMs } from './pom'
 import { hoodieBOM, tshirtBOM } from './bom'
 import { hoodieConstruction, tshirtConstruction } from './construction'
-import { renderHoodieFlat, renderTshirtFlat, elementsToSvg } from '../engines/technical-flat/svg'
+import { renderHoodieFlat, renderTshirtFlat, renderBackFlat, elementsToSvg } from '../engines/technical-flat/svg'
 import { createTechPackDocument, renderTechPackSvg } from './tech-pack'
 
 function valueFor(spec: GarmentSpec, id: string, fallback: number): number {
@@ -11,10 +11,11 @@ function valueFor(spec: GarmentSpec, id: string, fallback: number): number {
 }
 
 function geometryFor(spec: GarmentSpec) {
-  const bodyWidth = valueFor(spec, 'chest', spec.category === 'hoodie' ? 100 : 92)
-  const bodyLength = valueFor(spec, 'body-length', spec.category === 'hoodie' ? 230 : 220)
-  const sleeveLength = valueFor(spec, 'sleeve', spec.category === 'hoodie' ? 70 : 52)
-  return { bodyWidth, bodyLength, sleeveLength }
+  return {
+    bodyWidth: valueFor(spec, 'chest', spec.category === 'hoodie' ? 100 : 92),
+    bodyLength: valueFor(spec, 'body-length', spec.category === 'hoodie' ? 230 : 220),
+    sleeveLength: valueFor(spec, 'sleeve', spec.category === 'hoodie' ? 70 : 52),
+  }
 }
 
 export function buildTechPackPreview(spec: GarmentSpec) {
@@ -24,9 +25,13 @@ export function buildTechPackPreview(spec: GarmentSpec) {
   const construction = isHoodie ? hoodieConstruction : tshirtConstruction
   const geometry = geometryFor(spec)
   const frontElements = isHoodie ? renderHoodieFlat(geometry) : renderTshirtFlat(geometry)
-  const flatSvg = elementsToSvg(frontElements)
+  const backElements = renderBackFlat(spec.category, geometry)
+  const flatSvg = elementsToSvg([...frontElements, ...backElements.map(e => ({ ...e, attrs: { ...e.attrs, transform: `translate(190 0) ${e.attrs.transform ?? ''}` } }))])
   const document = createTechPackDocument(spec.category)
   document.styleName = spec.name
+  document.sections = document.sections.map(section => section.title === 'MEASUREMENTS'
+    ? { ...section, items: poms.map(p => `${p.code}: ${p.name} — ${spec.measurements.find(m => m.id === p.id)?.value ?? 'TBD'} ${p.unit}`) }
+    : section)
   return {
     spec,
     pom: poms.map(item => ({ ...item, value: spec.measurements.find(m => m.id === item.id)?.value ?? item.value })),
