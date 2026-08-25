@@ -10,13 +10,14 @@ function valueFor(spec: GarmentSpec, id: string, fallback: number) { return spec
 function geometryFor(spec: GarmentSpec) { return { bodyWidth:valueFor(spec,'chest',spec.category==='hoodie'?100:92), bodyLength:valueFor(spec,'body-length',spec.category==='hoodie'?230:220), sleeveLength:valueFor(spec,'sleeve',spec.category==='hoodie'?70:52) } }
 
 export function buildTechPackPreview(spec: GarmentSpec, artworks: ArtworkSpec[] = []) {
-  const isHoodie=spec.category==='hoodie', poms=isHoodie?hoodiePOMs:tshirtPOMs, bom=isHoodie?hoodieBOM:tshirtBOM, construction=isHoodie?hoodieConstruction:tshirtConstruction, geometry=geometryFor(spec)
+  const isHoodie=spec.category==='hoodie', poms=isHoodie?hoodiePOMs:tshirtPOMs, bom=isHoodie?hoodieBOM:tshirtBOM, construction=isHoodie?hoodieConstruction: t shirtConstruction, geometry=geometryFor(spec)
   const overlays=artworks.map(artwork=>({id:artwork.id,name:artwork.name,technique:artwork.technique,placement:artwork.placement,width:artwork.width,height:artwork.height,colors:artwork.colors,notes:artwork.notes,assetDataUrl:artwork.assetDataUrl}))
-  const frontArtworks=overlays.filter(a=>a.placement!=='center-back'), backArtworks=overlays.filter(a=>a.placement==='center-back')
+  const backPlacements=new Set(['center-back','neck-label','hem-label'])
+  const frontArtworks=overlays.filter(a=>!backPlacements.has(a.placement))
+  const backArtworks=overlays.filter(a=>backPlacements.has(a.placement))
   const frontElements=isHoodie?renderHoodieFlat(geometry,frontArtworks):renderTshirtFlat(geometry,frontArtworks)
-  const backElements=renderBackFlat(spec.category,geometry,backArtworks)
-  const translatedBack=backElements.map(e=>({ ...e, attrs:{...e.attrs,transform:`translate(190 0) ${e.attrs.transform??''}`}}))
-  const flatSvg=elementsToSvg([...frontElements,...translatedBack])
+  const backElements=renderBackFlat(spec.category,geometry,backArtworks).map(e=>({ ...e, attrs:{...e.attrs,transform:`translate(190 0) ${e.attrs.transform??''}`}}))
+  const flatSvg=elementsToSvg([...frontElements,...backElements],740,360)
   const document=createTechPackDocument(spec.category); document.styleName=spec.name
   document.sections=document.sections.map(section=>{
     if(section.title==='PRODUCT OVERVIEW')return {...section,items:[`Style: ${spec.name}`,`Category: ${spec.category==='hoodie'?'Hoodie':'T-shirt'}`,`Fit: ${spec.fit}`,`Colorway: ${spec.colorways.join(', ')||'TBD'}`]}
