@@ -5,6 +5,18 @@ const path = (d: string, attrs: Record<string, string | number> = {}): SvgElemen
 const line = (x1:number,y1:number,x2:number,y2:number,attrs:Record<string,string|number>={}) => ({ tag:'line' as const, attrs:{x1,y1,x2,y2,stroke:'#111','stroke-width':1.4,...attrs} })
 const text = (x:number,y:number,value:string,attrs:Record<string,string|number>={}) => ({ tag:'text' as const, attrs:{x,y,'font-family':'Arial, sans-serif','font-size':9,fill:'#111',...attrs,'data-text':value} })
 
+function dimension(x1:number,y1:number,x2:number,y2:number,label:string,offset=14): SvgElement[] {
+  const horizontal = y1 === y2
+  const ox = horizontal ? 0 : offset
+  const oy = horizontal ? offset : 0
+  return [
+    line(x1,y1,x2,y2,{'stroke-dasharray':'3 3','stroke-width':1}),
+    line(x1,y1,x1+ox,y1+oy,{'stroke-width':0.8}),
+    line(x2,y2,x2+ox,y2+oy,{'stroke-width':0.8}),
+    text((x1+x2)/2+ox,(y1+y2)/2+oy-3,label,{'text-anchor':'middle','font-size':8}),
+  ]
+}
+
 export function renderTshirtFlat(options: FlatOptions = {}): SvgElement[] {
   const w = options.bodyWidth ?? 92, h = options.bodyLength ?? 220, sleeve = options.sleeveLength ?? 52
   const cx = 150, top = 72, left = cx - w / 2, right = cx + w / 2, hem = top + h
@@ -15,7 +27,9 @@ export function renderTshirtFlat(options: FlatOptions = {}): SvgElement[] {
     line(left, hem, right, hem, {'stroke-width':2.4}),
     line(left-22, top+85, left+22, top+62, {'stroke-width':1}),
     line(right+22, top+85, right-22, top+62, {'stroke-width':1}),
-    text(cx, hem+22, 'FRONT', {'text-anchor':'middle','font-size':10,'font-weight':'700'}),
+    ...dimension(left, hem, right, hem, `${w} cm`, 12),
+    ...dimension(right, top+62, right, hem, `${h} cm`, 22),
+    text(cx, hem+38, 'FRONT', {'text-anchor':'middle','font-size':10,'font-weight':'700'}),
   ]
 }
 
@@ -30,7 +44,9 @@ export function renderHoodieFlat(options: FlatOptions = {}): SvgElement[] {
     line(left, hem, right, hem, {'stroke-width':2.4}),
     line(left-20, top+94, left+22, top+64, {'stroke-width':1}),
     line(right+20, top+94, right-22, top+64, {'stroke-width':1}),
-    text(cx, hem+22, 'FRONT', {'text-anchor':'middle','font-size':10,'font-weight':'700'}),
+    ...dimension(left, hem, right, hem, `${w} cm`, 12),
+    ...dimension(right, top+64, right, hem, `${h} cm`, 22),
+    text(cx, hem+38, 'FRONT', {'text-anchor':'middle','font-size':10,'font-weight':'700'}),
   ]
 }
 
